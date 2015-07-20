@@ -1,0 +1,200 @@
+///*------------------------------------*\
+//   #MASTHEAD
+//\*------------------------------------*/
+//
+//    <div class="c-masthead">
+//    	<div class="c-masthead__content">
+//    		<h1>Title</h1>
+//    		<h2>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</h2>
+//    	</div>
+//    	<img src="$ThemeDir/images/test.jpg" alt="" class="c-masthead__media" />
+//    </div>
+
+$masthead-16\:9-width: 1280px;
+$masthead-16\:9-height: 720px;
+$masthead-height\@palm: 360px;
+
+
+$color-masthead-background: #000;
+$color-masthead-background-contrast: #000;
+$color-masthead: #fff;
+
+$plump-enable-content-bottom: false;
+$plump-enable-content-center: false;
+
+$plump-enable-media-content-stack\@palm: false;
+$plump-enable-media-hide-palm: false;
+
+$plump-enable-content-overlay: false;
+$plump-enable-content-center-text: false;
+
+
+
+
+// 1. The masthead needs positioning context for us to lay out any children.
+// 2. Mastheads will typically have dark backgrounds, so we need to make sure
+//    the contrast is okay. This value is subject to change as the background
+//    image changes.
+// 3. Set the background color of the masthead to a similar colour to the
+//    image in case the image doesn’t load or images are turned off.
+//    Make sure the value has enough contrast.
+// 4. We are going to be absolutely positioning children to various heights
+//    at different viewports, so let’s make sure we clip the contents.
+// 5. Reset the intrinsic height to we can use…
+// 6. …a faux-fluid-height technique: simply create the illusion of fluid
+//    height by creating space via a percentage padding, and then position
+//    everything over the top of that. This percentage gives us a 16:9 ratio.
+// 7. When the viewport is 1280px wide, the masthead image is 720px, so let’s
+//    fix the height to preserve the aspect ratio and to prevent the
+//    masthead’s height from growing proportionally (16:9) too tall at wide
+//    viewports (if not contained in a wrapper).
+// 8. Snip off the fluid feature when the height is set.
+// 9. If we want to stack the content on top of the image at mobile viewports,
+//    we are going to be taking elements out of the normal flow, the masthead
+//    won’t have an intrinsic height, so let’s set one that makes sense for the
+//    amount of content we have in the masthead to push itself away from
+//    proceeding contents.
+.c-masthead {
+	position: relative;                                                // [1]
+	color: $color-masthead;                                            // [2]
+	background-color: $color-masthead-background;                      // [3]
+
+	@include media-query(lap-and-up) {
+		overflow: hidden;                                              // [4]
+		height: 0;                                                     // [5]
+		padding-top: percentage(9/16);                                 // [6]
+	}
+
+	@media screen and (min-width: $masthead-16\:9-width) {
+		height: $masthead-16\:9-height;                                // [7]
+		padding-top: 0;                                                // [8]
+	}
+
+	@if ($plump-enable-media-content-stack\@palm == true) {
+		height: $masthead-height\@palm;                                // [9]
+	}
+
+	// 1. If we don’t want to show an image at mobile viewport, let’s hide it.
+	// 2. To layer the media and content on top of each other at palm viewports
+	//    we need to break the media block out of the typical content flow,
+	//    rendering the rest of the content as if that media block isn’t there.
+	// 3. Give the browser a new bounding box for the media block. At this
+	//    point the media block will fill all available space of it’s
+	//    masthead parent element.
+	//    For absolutely positioned elements, the top, right, bottom, and left
+	//    properties specify offsets from the edge of the element’s containing
+	//    block (what the element is positioned relative to).
+	// 4. Without wanting to layer at mobile viewports, we only need to
+	//    break the media block out at laptop and up viewports.
+	&__media {
+
+		@if ($plump-enable-media-hide-palm == true) {
+
+			@include media-query(palm) {
+
+				@include hide;                                         // [1]
+
+			}
+
+		}
+
+		@if ($plump-enable-media-content-stack\@palm ==  true) {
+
+			position: absolute;                                        // [2]
+			top: 0;                                                    // [3]
+			left: 0;                                                   // [3]
+			width: 100%;                                               // [3]
+			object-fit: cover;
+
+
+		} @else {
+
+			@include media-query(lap-and-up) {                         // [4]
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				object-fit: cover;
+			}
+
+		}
+
+	}
+
+	// 1. Break the content block out of normal flow so we can position it
+	//    over the top of the media block.
+	// 2. Set the stacking layer order above the media block.
+	// 3. We don’t want to break the content block out of normal flow if
+	//    don’t want to layer the media and contents on top of each other
+	//    at mobile viewports, so let’s reset it’s position context back to
+	//    default behaviour.
+	// 4. If we want to position the contents to the bottom of the masthead
+	//    we need to reset the top offset position…
+	// 5. …now we can give it a new bottom offset.
+	// 6. We can set the contents position to the vertical and horizontal
+	//    center of the masthead using a mixture of position offset values,
+	//    then negative transform property values (to pull it back).
+	//    We only want the centering position to be applied when we are
+	//    layering the media and contents on top of each other at mobile
+	//    viewports, due to the positioning context we are using to achieve
+	//    that (you can’t center two elements when they are in normal flow),
+	//    however…
+	// 7. …If we aren’t layering the media and contents on top of each
+	//    other at mobile viewports, then we only want this to apply at
+	//    laptop and up viewports.
+	//    By default the content fill all available space, so you notice
+	//    the horizontal centering unless to assign a width value that’s
+	//    less than 100%.
+	&__content {                                                       // [1]
+		position: absolute;
+		z-index: 1;                                                    // [2]
+		top: 0;
+		left: 0;
+		width: 100%;
+		padding: $spacing-unit;
+
+		@if ($plump-enable-media-content-stack\@palm == false) {
+
+			@include media-query(palm) {                               // [3]
+				position: static;
+			}
+
+		}
+
+		@if ($plump-enable-content-bottom == true) {
+			top: auto;                                                 // [4]
+			bottom: 0;                                                 // [5]
+		}
+
+		@if ($plump-enable-content-center == true) {
+			top: 50%;
+			left: 50%;
+
+			@if ($plump-enable-media-content-stack\@palm == true) {
+
+				transform: translateY(-50%) translateX(-50%);          // [6]
+
+			} @else {
+
+				@include media-query(lap-and-up) {
+					transform: translateY(-50%) translateX(-50%);      // [7]
+				}
+
+			}
+		}
+
+		@if ($plump-enable-content-center-text == true) {
+
+			text-align: center;
+
+		}
+
+		@if ($plump-enable-content-overlay == true) {
+
+			@include alpha('background-color', rgba($color-masthead-background-contrast, .25), $color-masthead-background-contrast);
+
+		}
+
+	}
+
+}
